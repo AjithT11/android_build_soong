@@ -722,7 +722,7 @@ func (c *configImpl) Dist() bool {
 }
 
 func (c *configImpl) IsVerbose() bool {
-	return c.verbose
+	return true
 }
 
 func (c *configImpl) SkipMake() bool {

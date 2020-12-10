@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"runtime"
+//	"runtime"
 	"runtime/pprof"
 	"runtime/trace"
 	"strconv"
@@ -131,14 +131,14 @@ func main() {
 	out := flags.String("o", "", "file to write zip file to")
 	manifest := flags.String("m", "", "input jar manifest file name")
 	directories := flags.Bool("d", false, "include directories in zip")
-	compLevel := flags.Int("L", 5, "deflate compression level (0-9)")
+	compLevel := flags.Int("L", 3, "deflate compression level (0-9)")
 	emulateJar := flags.Bool("jar", false, "modify the resultant .zip to emulate the output of 'jar'")
 	writeIfChanged := flags.Bool("write_if_changed", false, "only update resultant .zip if it has changed")
 	ignoreMissingFiles := flags.Bool("ignore_missing_files", false, "continue if a requested file does not exist")
 	symlinks := flags.Bool("symlinks", true, "store symbolic links in zip instead of following them")
 	srcJar := flags.Bool("srcjar", false, "move .java files to locations that match their package statement")
 
-	parallelJobs := flags.Int("parallel", runtime.NumCPU(), "number of parallel threads to use")
+	parallelJobs := flags.Int("parallel", 2, "number of parallel threads to use")
 	cpuProfile := flags.String("cpuprofile", "", "write cpu profile to file")
 	traceFile := flags.String("trace", "", "write trace to file")
 

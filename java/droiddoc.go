@@ -707,12 +707,14 @@ func (j *Javadoc) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		deps.systemModules, deps.classpath, j.sourcepaths)
 
 	cmd.FlagWithArg("-source ", javaVersion.String()).
-		Flag("-J-Xmx1024m").
+		Flag("-J-Xmx16G").
+		//Flag("-J-Xmx1024m").
 		Flag("-XDignore.symbol.file").
 		Flag("-Xdoclint:none")
 
 	rule.Command().
 		BuiltTool(ctx, "soong_zip").
+		Flag("-parallel 2").
 		Flag("-write_if_changed").
 		Flag("-d").
 		FlagWithOutput("-o ", j.docZip).
@@ -789,7 +791,8 @@ func (d *Droiddoc) doclavaDocsFlags(ctx android.ModuleContext, cmd *android.Rule
 	// sources, droiddoc will get sources produced by metalava which will have already stripped out the
 	// 1.9 language features.
 	cmd.FlagWithArg("-source ", "1.8").
-		Flag("-J-Xmx1600m").
+		Flag("-J-Xmx16G").
+		//Flag("-J-Xmx1600m").
 		Flag("-J-XX:-OmitStackTraceInFastThrow").
 		Flag("-XDignore.symbol.file").
 		FlagWithArg("-doclet ", "com.google.doclava.Doclava").
@@ -909,6 +912,7 @@ func javadocCmd(ctx android.ModuleContext, rule *android.RuleBuilder, srcs andro
 
 	cmd := rule.Command().
 		BuiltTool(ctx, "soong_javac_wrapper").Tool(config.JavadocCmd(ctx)).
+		Flag("-J-Xmx16G").
 		Flag(config.JavacVmFlags).
 		FlagWithArg("-encoding ", "UTF-8").
 		FlagWithRspFileInputList("@", srcs).
@@ -1075,7 +1079,7 @@ func (d *Droiddoc) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 
 		rule.Command().
 			BuiltTool(ctx, "apicheck").
-			Flag("-JXmx1024m").
+			Flag("-J-Xmx16G").
 			FlagWithInputList("-Jclasspath\\ ", checkApiClasspath.Paths(), ":").
 			OptionalFlag(d.properties.Check_api.Current.Args).
 			Input(apiFile).
@@ -1143,7 +1147,8 @@ func (d *Droiddoc) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		rule.Command().
 			Text("(").
 			BuiltTool(ctx, "apicheck").
-			Flag("-JXmx1024m").
+			Flag("-J-Xmx16G").
+			//Flag("-JXmx1024m").
 			FlagWithInputList("-Jclasspath\\ ", checkApiClasspath.Paths(), ":").
 			OptionalFlag(d.properties.Check_api.Last_released.Args).
 			Input(apiFile).
@@ -1474,6 +1479,7 @@ func metalavaCmd(ctx android.ModuleContext, rule *android.RuleBuilder, javaVersi
 
 	cmd.BuiltTool(ctx, "metalava").
 		Flag(config.JavacVmFlags).
+		Flag("-J-Xmx12G").
 		FlagWithArg("-encoding ", "UTF-8").
 		FlagWithArg("-source ", javaVersion.String()).
 		FlagWithRspFileInputList("@", srcs).
@@ -1509,7 +1515,7 @@ func metalavaCmd(ctx android.ModuleContext, rule *android.RuleBuilder, javaVersi
 
 	cmd.Flag("--no-banner").
 		Flag("--color").
-		Flag("--quiet").
+		//Flag("--quiet").
 		Flag("--format=v2")
 
 	return cmd
@@ -1858,11 +1864,11 @@ func (d *Droidstubs) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 		cmd := javadocBootclasspathCmd(ctx, rule, d.Javadoc.srcFiles, outDir, srcJarDir, srcJarList,
 			deps.bootClasspath, deps.classpath, d.sourcepaths)
 
-		cmd.Flag("-J-Xmx1600m").
+		cmd.Flag("-J-Xmx16G").
 			Flag("-XDignore.symbol.file").
 			FlagWithArg("-doclet ", "jdiff.JDiff").
-			FlagWithInput("-docletpath ", jdiff).
-			Flag("-quiet")
+			FlagWithInput("-docletpath ", jdiff)
+			//Flag("-quiet")
 
 		if d.apiXmlFile != nil {
 			cmd.FlagWithArg("-newapi ", strings.TrimSuffix(d.apiXmlFile.Base(), d.apiXmlFile.Ext())).
@@ -1881,6 +1887,7 @@ func (d *Droidstubs) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 			Flag("-write_if_changed").
 			Flag("-d").
 			FlagWithOutput("-o ", d.jdiffDocZip).
+			Flag("-parallel 2").
 			FlagWithArg("-C ", outDir.String()).
 			FlagWithArg("-D ", outDir.String())
 
@@ -1889,6 +1896,7 @@ func (d *Droidstubs) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 			Flag("-write_if_changed").
 			Flag("-jar").
 			FlagWithOutput("-o ", d.jdiffStubsSrcJar).
+			Flag("-parallel 2").
 			FlagWithArg("-C ", stubsDir.String()).
 			FlagWithArg("-D ", stubsDir.String())
 
